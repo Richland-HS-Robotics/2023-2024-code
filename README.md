@@ -1,4 +1,4 @@
-# Road Runner Quickstart
+# 2023-2024 Code
 
-Check out the [docs](https://rr.brott.dev/docs/v1-0/tuning/).
+This is the repository for the RHS 2023-2024 season's code.
 
