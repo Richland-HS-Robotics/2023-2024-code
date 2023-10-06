@@ -19,4 +19,16 @@ public class HelperFunctions {
     }
 
 
+    /**
+     * Check if two values are equal to a certain threshold
+     * @param a The first value
+     * @param b The second value
+     * @param threshold The threshold value
+     * @return Whether the values should be considered equal.
+     */
+   public static boolean compare(double a, double b,double threshold){
+       return Math.abs(a-b)<threshold;
+   }
+
+
 }

@@ -1,6 +1,7 @@
 package ftc.teamcode;
 
 import ftc.teamcode.fakes.FakeDcMotor;
+import ftc.teamcode.fakes.FakeExtendedDcMotor;
 import ftc.teamcode.fakes.FakeHardwareMap;
 import ftc.teamcode.fakes.FakeIMU;
 
@@ -12,10 +13,10 @@ import org.junit.Test;
 
 public class DriveTest {
 
-    private FakeDcMotor leftRear;
-    private FakeDcMotor leftFront;
-    private FakeDcMotor rightRear;
-    private  FakeDcMotor rightFront;
+    private FakeExtendedDcMotor leftRear;
+    private FakeExtendedDcMotor leftFront;
+    private FakeExtendedDcMotor rightRear;
+    private  FakeExtendedDcMotor rightFront;
     private FakeHardwareMap hardwareMap;
     private FakeIMU imu;
     private Telemetry telemetry;
@@ -24,10 +25,10 @@ public class DriveTest {
     @Before
     public void before(){
         hardwareMap = new FakeHardwareMap();
-        leftRear = new FakeDcMotor();
-        leftFront = new FakeDcMotor();
-        rightRear = new FakeDcMotor();
-        rightFront = new FakeDcMotor();
+        leftRear = new FakeExtendedDcMotor();
+        leftFront = new FakeExtendedDcMotor();
+        rightRear = new FakeExtendedDcMotor();
+        rightFront = new FakeExtendedDcMotor();
         imu = new FakeIMU();
 
         hardwareMap.addDevice("leftRear",leftRear);
