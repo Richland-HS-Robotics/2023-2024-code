@@ -24,6 +24,7 @@ import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
@@ -88,6 +89,9 @@ public class DriveTrain {
             this.disabled = true;
         }
 
+        this.leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        this.rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+
         this.localizer = new DriveLocalizer(
                 new OverflowEncoder(new RawEncoder(this.leftFront)),
                 new OverflowEncoder(new RawEncoder(this.leftRear)),
@@ -123,8 +127,8 @@ public class DriveTrain {
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rot),1);
 
         double leftFrontPower = (y + x + rot) / denominator;
-        double leftRearPower = (y - x + rot) / denominator;
-        double rightFrontPower = (y - x - rot) / denominator;
+        double leftRearPower = (y - x - rot) / denominator;
+        double rightFrontPower = (y - x + rot) / denominator;
         double rightRearPower = (y + x - rot) / denominator;
 
         this.leftFront.setPower(leftFrontPower);
@@ -150,22 +154,24 @@ public class DriveTrain {
         double heading = this.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
 
-        double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
-        double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
+        double rotX = x * Math.cos(heading) - y * Math.sin(heading);
+        double rotY = x * Math.sin(heading) + y * Math.cos(heading);
 
         rotX *= STRAFE_COEFFICIENT;
 
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rot),1);
-        double leftFrontPower = (rotY + rotX + rot) / denominator;
-        double leftRearPower = (rotY - rotX + rot) / denominator;
-        double rightFrontPower = (rotY - rotX - rot) / denominator;
-        double rightRearPower = (rotY + rotX - rot) / denominator;
+        localDrive(rotY,rotX,turn);
 
-
-        this.leftFront.setPower(leftFrontPower);
-        this.leftRear.setPower(leftRearPower);
-        this.rightFront.setPower(rightFrontPower);
-        this.rightRear.setPower(rightRearPower);
+//        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rot),1);
+//        double leftFrontPower = (rotY + rotX + rot) / denominator;
+//        double leftRearPower = (rotY - rotX + rot) / denominator;
+//        double rightFrontPower = (rotY - rotX - rot) / denominator;
+//        double rightRearPower = (rotY + rotX - rot) / denominator;
+//
+//
+//        this.leftFront.setPower(leftFrontPower);
+//        this.leftRear.setPower(leftRearPower);
+//        this.rightFront.setPower(rightFrontPower);
+//        this.rightRear.setPower(rightRearPower);
     }
 
 

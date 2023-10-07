@@ -28,7 +28,9 @@ public class BasicTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        localDrive();
+
+        globalDrive();
+       // localDrive();
     }
 
 
