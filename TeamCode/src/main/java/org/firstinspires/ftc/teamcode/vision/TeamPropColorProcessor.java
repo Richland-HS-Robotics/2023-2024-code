@@ -15,9 +15,9 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class TeamPropColorProcessor implements VisionProcessor {
-    private Rect rectLeft;// = new Rect(20,42,150,50);
-    private Rect rectMiddle;// = new Rect(20,100,150,50);
-    private Rect rectRight;// = new Rect(20,160,150,50);
+    private Rect rectTop;
+    private Rect rectMiddle;
+    private Rect rectBottom;
 
     private Selected selection = Selected.NONE;
 
@@ -38,87 +38,86 @@ public class TeamPropColorProcessor implements VisionProcessor {
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
         // width - 10 pixels each side divided by 3, 5 pixels between sections
-        int selectionWidth = (width - (10*2) - (2*5)) / 3;
 
-        int selectionHeight = (height - (10*2));
+        int outerSpacing = 10;
+        int innerSpacing = 5;
 
-        rectLeft = new Rect(10,10,selectionWidth,selectionHeight);
-        rectMiddle = new Rect(10 + selectionWidth + 5,10,selectionWidth,selectionHeight);
-        rectRight = new Rect(10 + (2*selectionWidth) + 10,10,selectionWidth,selectionHeight);
+        // **[]*[]*[]**
+
+        int selectionWidth = width - (2*outerSpacing);
+
+        int selectionHeight = (height-2*outerSpacing-2*innerSpacing)/3;
+
+
+        rectTop = new Rect(outerSpacing,outerSpacing,selectionWidth,selectionHeight);
+        rectMiddle = new Rect(outerSpacing,selectionHeight+outerSpacing+innerSpacing,selectionWidth,selectionHeight);
+        rectBottom = new Rect(outerSpacing,2*selectionHeight + 2*innerSpacing + outerSpacing,selectionWidth,selectionHeight);
     }
 
     @Override
     public Object processFrame(Mat frame, long captureTimeNanos) {
         Imgproc.cvtColor(frame,hsvMat,Imgproc.COLOR_RGB2HSV);
 
-        Scalar lowerRedBound = new Scalar(359,85,39.2);
-        Scalar upperRedBound = new Scalar(2,75,78.4);
 
-        Core.inRange(frame,lowerRedBound,upperRedBound,mask);
-
-        Core.bitwise_and(frame,frame,output,mask);
-
-
-//        double satRectLeft = getAvgSaturation(hsvMat,rectLeft);
-//        double satRectMiddle = getAvgSaturation(hsvMat,rectMiddle);
-//        double satRectRight = getAvgSaturation(hsvMat,rectRight);
+        double satRectLeft = getAvgSaturation(hsvMat, rectTop);
+        double satRectMiddle = getAvgSaturation(hsvMat,rectMiddle);
+        double satRectRight = getAvgSaturation(hsvMat, rectBottom);
 
 
 
-//        if( (satRectLeft > satRectMiddle) && (satRectLeft > satRectRight)){
-//            return Selected.LEFT;
-//        }else if ((satRectMiddle > satRectLeft) && (satRectMiddle > satRectRight)){
-//            return Selected.MIDDLE;
-//        }else if ((satRectRight > satRectLeft) && (satRectRight > satRectMiddle)){
-//            return Selected.RIGHT;
-//        }
-//        return Selected.NONE;
-        return null;
+        if( (satRectLeft > satRectMiddle) && (satRectLeft > satRectRight)){
+            return Selected.LEFT;
+        }else if ((satRectMiddle > satRectLeft) && (satRectMiddle > satRectRight)){
+            return Selected.MIDDLE;
+        }else if ((satRectRight > satRectLeft) && (satRectRight > satRectMiddle)){
+            return Selected.RIGHT;
+        }
+        return Selected.NONE;
     }
 
 
     @Override
     public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
 //        canvas.setMatrix(new Matrix.);
-        canvas.setMatrix(cvMat2Matrix(output));
+//        canvas.setMatrix(cvMat2Matrix(output));
+// ----------------------------------------------
+        Paint selectedPaint = new Paint();
+        selectedPaint.setColor(Color.RED);
+        selectedPaint.setStyle(Paint.Style.STROKE);
+        selectedPaint.setStrokeWidth(scaleCanvasDensity * 4);
 
-//        Paint selectedPaint = new Paint();
-//        selectedPaint.setColor(Color.RED);
-//        selectedPaint.setStyle(Paint.Style.STROKE);
-//        selectedPaint.setStrokeWidth(scaleCanvasDensity * 4);
-//
-//
-//        Paint nonSelectedPaint = new Paint();
-//        nonSelectedPaint.setColor(Color.argb(100,0,255,0));
-//
-//
-//        android.graphics.Rect drawRectangleLeft = makeGraphicsRect(rectLeft,scaleBmpPxToCanvasPx);
-//        android.graphics.Rect drawRectangleMiddle = makeGraphicsRect(rectMiddle,scaleBmpPxToCanvasPx);
-//        android.graphics.Rect drawRectangleRight = makeGraphicsRect(rectRight,scaleBmpPxToCanvasPx);
-//
-//        selection = (Selected) userContext;
-//        switch (selection){
-//            case LEFT:
-//                canvas.drawRect(drawRectangleLeft,selectedPaint);
-//                canvas.drawRect(drawRectangleMiddle,nonSelectedPaint);
-//                canvas.drawRect(drawRectangleRight,nonSelectedPaint);
-//                break;
-//            case MIDDLE:
-//                canvas.drawRect(drawRectangleLeft,nonSelectedPaint);
-//                canvas.drawRect(drawRectangleMiddle,selectedPaint);
-//                canvas.drawRect(drawRectangleRight,nonSelectedPaint);
-//                break;
-//            case RIGHT:
-//                canvas.drawRect(drawRectangleLeft,nonSelectedPaint);
-//                canvas.drawRect(drawRectangleMiddle,nonSelectedPaint);
-//                canvas.drawRect(drawRectangleRight,selectedPaint);
-//                break;
-//            case NONE:
-//                canvas.drawRect(drawRectangleLeft,nonSelectedPaint);
-//                canvas.drawRect(drawRectangleMiddle,nonSelectedPaint);
-//                canvas.drawRect(drawRectangleRight,nonSelectedPaint);
-//                break;
-//        }
+
+        Paint nonSelectedPaint = new Paint();
+        nonSelectedPaint.setColor(Color.argb(100,0,255,0));
+
+
+        android.graphics.Rect drawRectangleLeft = makeGraphicsRect(rectTop,scaleBmpPxToCanvasPx);
+        android.graphics.Rect drawRectangleMiddle = makeGraphicsRect(rectMiddle,scaleBmpPxToCanvasPx);
+        android.graphics.Rect drawRectangleRight = makeGraphicsRect(rectBottom,scaleBmpPxToCanvasPx);
+
+        selection = (Selected) userContext;
+        switch (selection){
+            case LEFT:
+                canvas.drawRect(drawRectangleLeft,selectedPaint);
+                canvas.drawRect(drawRectangleMiddle,nonSelectedPaint);
+                canvas.drawRect(drawRectangleRight,nonSelectedPaint);
+                break;
+            case MIDDLE:
+                canvas.drawRect(drawRectangleLeft,nonSelectedPaint);
+                canvas.drawRect(drawRectangleMiddle,selectedPaint);
+                canvas.drawRect(drawRectangleRight,nonSelectedPaint);
+                break;
+            case RIGHT:
+                canvas.drawRect(drawRectangleLeft,nonSelectedPaint);
+                canvas.drawRect(drawRectangleMiddle,nonSelectedPaint);
+                canvas.drawRect(drawRectangleRight,selectedPaint);
+                break;
+            case NONE:
+                canvas.drawRect(drawRectangleLeft,nonSelectedPaint);
+                canvas.drawRect(drawRectangleMiddle,nonSelectedPaint);
+                canvas.drawRect(drawRectangleRight,nonSelectedPaint);
+                break;
+        }
     }
 
 
@@ -141,29 +140,5 @@ public class TeamPropColorProcessor implements VisionProcessor {
         submat = input.submat(rect);
         Scalar color = Core.mean(submat);
         return color.val[1];
-    }
-
-
-
-    static Matrix cvMat2Matrix(Mat source) {
-        if (source == null || source.empty()) {
-            return null;
-        }
-        float[] matrixValuesF = new float[source.cols()*source.rows()];
-
-        if (CvType.depth(source.type()) == CvType.CV_32F) {
-            source.get(0,0, matrixValuesF);
-        } else {
-            double[] matrixValuesD = new double[matrixValuesF.length];
-            source.get(0, 0, matrixValuesD);
-            //will throw an java.lang.UnsupportedOperationException if type is not CvType.CV_64F
-            for (int i=0; i<matrixValuesD.length; i++) {
-                matrixValuesF[i] = (float) matrixValuesD[i];
-            }
-        }
-
-        Matrix result = new Matrix();
-        result.setValues(matrixValuesF);
-        return result;
     }
 }

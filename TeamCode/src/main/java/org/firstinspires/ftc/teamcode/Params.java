@@ -3,15 +3,14 @@ package org.firstinspires.ftc.teamcode;
 public final class Params {
     // drive model parameters
 
-    // 122 inches over 6632.75 ticks
-    public double inPerTick = 0.01839357732;
-    // 120 inches over 5953.5 ticks
-    public double lateralInPerTick = 0.02015621063;
-    public double trackWidthTicks = 1043.335391094545;
+   // 165 inches over 105447.5 ticks
+    public double inPerTick = 0.001564759715;
+    public double lateralInPerTick = 0.013718265422800798;
+    public double trackWidthTicks = 283.11119590089027;
 
     // feedforward parameters (in tick units)
-    public double kS = 0.7013313423791585;
-    public double kV = 0.004233626947138038;
+    public double kS = 0.6712553335877338;
+    public double kV = 0.0007835737129009071;
     public double kA = 0.001;
 
     // path profile parameters (in inches)
