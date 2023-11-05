@@ -11,6 +11,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.SimplerHardwareMap;
 
 @Config
+/**
+ * A class for managing the airplane launcher.
+ */
 public class AirplaneLauncher {
     private Telemetry telemetry;
 

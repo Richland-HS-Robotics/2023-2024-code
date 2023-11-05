@@ -1,9 +1,8 @@
 package ftc.teamcode;
 
-import com.acmerobotics.roadrunner.ftc.Encoder;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.Localizer;
+import org.firstinspires.ftc.teamcode.driveclasses.Localizer;
 import org.junit.Before;
 
 public class DriveLocalizerTest {

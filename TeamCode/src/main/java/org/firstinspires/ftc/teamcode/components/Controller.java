@@ -27,6 +27,9 @@ import org.firstinspires.ftc.teamcode.util.Triple;
  */
 
 
+/**
+ * A class for managing the gamepads, both 1 and 2 gamepads.
+ */
 public class Controller {
     private Gamepad currentGamepad1;
     private Gamepad currentGamepad2;

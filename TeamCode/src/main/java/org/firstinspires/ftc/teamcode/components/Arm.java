@@ -13,6 +13,9 @@ import org.firstinspires.ftc.teamcode.util.Pair;
 import org.firstinspires.ftc.teamcode.util.SimplerHardwareMap;
 
 @Config
+/**
+ * A class for managing the linear slide and pixel cartridge.
+ */
 public class Arm {
 
     private Telemetry telemetry;

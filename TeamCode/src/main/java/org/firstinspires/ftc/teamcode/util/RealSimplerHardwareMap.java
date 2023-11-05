@@ -10,6 +10,10 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+
+/**
+ * An implementation of {@link SimplerHardwareMap}, using the FTC hardwareMap variable.
+ */
 public class RealSimplerHardwareMap implements SimplerHardwareMap{
     private final HardwareMap realHardwareMap;
 

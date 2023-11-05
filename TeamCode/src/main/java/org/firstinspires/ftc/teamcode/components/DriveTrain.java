@@ -25,22 +25,18 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.DriveLocalizer;
-import org.firstinspires.ftc.teamcode.Localizer;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Params;
-import org.firstinspires.ftc.teamcode.PoseMessage;
+import org.firstinspires.ftc.teamcode.driveclasses.DriveLocalizer;
+import org.firstinspires.ftc.teamcode.driveclasses.Localizer;
+import org.firstinspires.ftc.teamcode.driveclasses.Params;
+import org.firstinspires.ftc.teamcode.driveclasses.PoseMessage;
 import org.firstinspires.ftc.teamcode.util.HelperFunctions;
-import org.firstinspires.ftc.teamcode.util.RealSimplerHardwareMap;
 import org.firstinspires.ftc.teamcode.util.SimplerHardwareMap;
 import org.firstinspires.ftc.teamcode.util.Triple;
 

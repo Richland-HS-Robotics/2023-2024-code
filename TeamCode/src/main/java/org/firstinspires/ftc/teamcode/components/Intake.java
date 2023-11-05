@@ -13,6 +13,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.SimplerHardwareMap;
 
 @Config
+/**
+ * A class for managing the intake, including the claw and intake raising/lowering.
+ */
 public class Intake {
     private Telemetry telemetry;
     private DcMotorEx theMotor;
@@ -41,12 +44,18 @@ public class Intake {
     }
 
 
+    /**
+     * Open the claw
+     */
     public void openClaw(){
         if(!disabled){
             servo.setPosition(SERVO_OPEN_POSITION);
         }
     }
 
+    /**
+     * Close the claw
+     */
     public void closeClaw(){
         if(!disabled){
             servo.setPosition(SERVO_CLOSE_POSITION);
@@ -54,6 +63,10 @@ public class Intake {
     }
 
 
+    /**
+     * Manually move the motor with a raw power.
+     * @param direction The power to give the motor
+     */
     public void moveMotor(double direction){
 
         if(!disabled){

@@ -24,6 +24,12 @@ import com.qualcomm.robotcore.hardware.HardwareDevice;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This is a wrapper interface for the hardwareMap variable.
+ * This allows us to create a mock hardwareMap to use for unit tests.
+ * @see RealSimplerHardwareMap
+ *
+ */
 public interface SimplerHardwareMap {
     <T> T get(Class<? extends T> classOrInterface, String deviceName);
 
