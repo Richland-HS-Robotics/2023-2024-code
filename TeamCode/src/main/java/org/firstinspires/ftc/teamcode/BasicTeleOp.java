@@ -50,9 +50,9 @@ public class BasicTeleOp extends OpMode {
 
 
     private void arm(){
-        arm.doMotor(controller.linearSlideInOut());
+        arm.manualPower(controller.linearSlideInOut());
 
-        arm.doPixels(controller.releasePixels());
+        arm.setBothServos(controller.releasePixels());
     }
 
 
