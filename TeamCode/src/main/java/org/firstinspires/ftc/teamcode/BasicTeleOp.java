@@ -7,10 +7,9 @@ import org.firstinspires.ftc.teamcode.components.AirplaneLauncher;
 import org.firstinspires.ftc.teamcode.components.Arm;
 import org.firstinspires.ftc.teamcode.components.Controller;
 import org.firstinspires.ftc.teamcode.components.DriveTrain;
-import org.firstinspires.ftc.teamcode.components.Intake;
+import org.firstinspires.ftc.teamcode.components.Claw;
 import org.firstinspires.ftc.teamcode.util.RealSimplerHardwareMap;
 import org.firstinspires.ftc.teamcode.util.SimplerHardwareMap;
-import org.firstinspires.ftc.teamcode.util.Triple;
 
 @TeleOp(name = "Basic TeleOp")
 public class BasicTeleOp extends OpMode {
@@ -20,7 +19,7 @@ public class BasicTeleOp extends OpMode {
 
     private Controller controller;
     private Arm arm;
-    private Intake intake;
+    private Claw intake;
     private AirplaneLauncher airplaneLauncher;
 
     private DriveTrain.DriveMode driveMode;
@@ -29,7 +28,7 @@ public class BasicTeleOp extends OpMode {
     public void init() {
         this.simplerHardwareMap = new RealSimplerHardwareMap(this.hardwareMap);
 
-        this.intake = new Intake(simplerHardwareMap,telemetry);
+        this.intake = new Claw(simplerHardwareMap,telemetry);
         this.arm = new Arm(simplerHardwareMap,telemetry);
         this.airplaneLauncher = new AirplaneLauncher(simplerHardwareMap,telemetry);
         this.driveTrain = new DriveTrain(simplerHardwareMap,telemetry);

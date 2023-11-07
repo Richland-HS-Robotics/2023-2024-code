@@ -125,6 +125,8 @@ public class FakeExtendedDcMotor implements DcMotorEx {
     private double motorPower;
 
     private int currentEncoderPosition;
+    private int currentTargetPosition;
+    private RunMode runMode;
 
 
     public FakeExtendedDcMotor() {
@@ -189,12 +191,12 @@ public class FakeExtendedDcMotor implements DcMotorEx {
 
     @Override
     public void setTargetPosition(int position) {
-
+        this.currentTargetPosition = position;
     }
 
     @Override
     public int getTargetPosition() {
-        return 0;
+        return this.currentTargetPosition;
     }
 
     @Override
@@ -214,12 +216,12 @@ public class FakeExtendedDcMotor implements DcMotorEx {
 
     @Override
     public void setMode(RunMode mode) {
-
+        this.runMode = mode;
     }
 
     @Override
     public RunMode getMode() {
-        return null;
+        return this.runMode;
     }
 
     @Override
