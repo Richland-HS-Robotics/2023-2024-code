@@ -8,6 +8,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -57,10 +58,13 @@ public class Claw {
         this.telemetry = telemetry;
 
         if(!disabled){
-            clawMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            //clawMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             clawMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
             clawMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         }
+
+        telemetry.addData("PID: ",
+        clawMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
     }
 
 
@@ -148,5 +152,14 @@ public class Claw {
     public void raiseClaw(){
         moveToPosition(ARM_ROTATION_RANGE);
     }
+
+    public void setPIDCoefficients(double p, double i, double d,double f){
+        clawMotor.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_TO_POSITION,
+                new PIDFCoefficients(p,i,d,f)
+        );
+    }
+
+
 
 }
