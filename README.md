@@ -33,3 +33,42 @@ Each of these classes contains the logic controlling each component.
 | Endgame | Drone launched                                | 30 or 20 or 10  |
 |         | Minor Penalty                                 | 10 (other team) |
 |         | Major Penalty                                 | 30 (other team) |
+
+## State Machine Diagram
+
+```mermaid
+stateDiagram-v2
+[*] --> Down_Idle
+
+state GrabPixel{
+    [*] --> Close_claw
+    Close_claw --> Lift_claw
+    Lift_claw --> Open_claw
+    Open_claw --> Lower_claw
+    Lower_claw --> [*]
+}
+Down_Idle --> GrabPixel
+GrabPixel --> Down_Idle
+
+Down_Idle --> Raise_lift
+Raise_lift --> Raise_claw
+Raise_claw --> Up_Idle
+
+state ScorePixel{
+    [*] --> Open_servo
+    Open_servo --> Close_servo
+    Close_servo --> [*]
+}
+
+Up_Idle --> ScorePixel
+ScorePixel --> Up_Idle
+
+state RetractLift{
+    [*] --> Lower_cclaw
+    Lower_cclaw --> Lower_lift
+    Lower_lift --> [*]
+}
+
+Up_Idle --> RetractLift
+RetractLift --> Down_Idle
+```
