@@ -31,4 +31,28 @@ public class HelperFunctions {
    }
 
 
+    /**
+     * Return whether an input is greater or equal to a threshold, within some error.
+     * @param input The input to compare
+     * @param threshold The threshold to compare the input to
+     * @param err The allowed error
+     * @return Whether the input is greater than the threshold, or equal to it
+     * within err.
+     */
+    public static boolean ge_threshold(double input,double threshold,double err){
+        return (input > threshold) || compare(input,threshold,err);
+    }
+
+    /**
+     * Return whether an input is less than or equal to a threshold, within some error.
+     * @param input The input to compare
+     * @param threshold The threshold to compare the input to
+     * @param err The allowed error
+     * @return Whether the input is less than the threshold, or equal to it
+     * within err.
+     */
+    public static boolean le_threshold(double input, double threshold, double err){
+        return (input < threshold) || compare(input,threshold,err);
+    }
+
 }

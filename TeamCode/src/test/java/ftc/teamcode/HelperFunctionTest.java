@@ -32,4 +32,26 @@ public class HelperFunctionTest {
         Assert.assertEquals(10,HelperFunctions.clamp(55,-10,10),0.0001);
         Assert.assertEquals(-10,HelperFunctions.clamp(-55,-10,10),0.0001);
     }
+
+
+    @Test
+    public void test_ge_threshold(){
+        Assert.assertTrue(HelperFunctions.ge_threshold(5,3,0.1));
+        Assert.assertTrue(HelperFunctions.ge_threshold(3,3,0.1));
+        Assert.assertTrue(HelperFunctions.ge_threshold(3,2.91,0.1));
+
+        Assert.assertFalse(HelperFunctions.ge_threshold(3,5,0));
+        Assert.assertFalse(HelperFunctions.ge_threshold(2.9,3,0.01));
+    }
+
+
+    @Test
+    public void test_le_threshold(){
+        Assert.assertTrue(HelperFunctions.le_threshold(2,7,0));
+        Assert.assertTrue(HelperFunctions.le_threshold(2,2,0.1));
+        Assert.assertTrue(HelperFunctions.le_threshold(3.05,3,0.1));
+
+        Assert.assertFalse(HelperFunctions.le_threshold(5,3,0));
+        Assert.assertFalse(HelperFunctions.le_threshold(3.1,3,0.01));
+    }
 }

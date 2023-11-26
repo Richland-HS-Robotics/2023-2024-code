@@ -34,8 +34,10 @@ public class Claw {
     // There are 288 encoder ticks for each rotation of the output shaft.
     public static final int TICKS_PER_ROTATION = 288;
 
-    // The rotational range of the arm, in radians.
-    // Currently at 90 degrees; TODO get a better measurement
+    /**
+     * The rotational range of the arm, in radians.
+     * Currently at 90 degrees; TODO get a better measurement
+     */
     public static final double ARM_ROTATION_RANGE = Math.PI/2;
 
 
@@ -112,6 +114,16 @@ public class Claw {
 
 
     /**
+     * Convert ticks to a relative angle. Both the input and output
+     * are relative, not absolute. They measure distance, not position.
+     * @param ticks The number of motor ticks.
+     * @return The angle covered by the ticks.
+     */
+    public double ticksToAngle(int ticks) {
+        return (ticks * 2*Math.PI)/TICKS_PER_ROTATION;
+    }
+
+    /**
      * Moves the claw to a fixed position.
      * @param angle An angle in radians, between 0 and ARM_ROTATION_RANGE. 0 represents
      *              the arm fully down, while ARM_ROTATION_RANGE represents it fully up.
@@ -158,6 +170,16 @@ public class Claw {
                 DcMotor.RunMode.RUN_TO_POSITION,
                 new PIDFCoefficients(p,i,d,f)
         );
+    }
+
+
+    /**
+     * Get the current position of the arm, in radians.
+     * @return The position, in radians. 0 means the arm is fully down, while ARM_ROTATION_RANGE
+     *         means it is all the way up.
+     */
+    public double getCurrentPosition(){
+        return this.ticksToAngle(clawMotor.getCurrentPosition());
     }
 
 

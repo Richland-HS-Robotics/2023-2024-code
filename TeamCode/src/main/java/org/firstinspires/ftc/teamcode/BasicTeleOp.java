@@ -57,7 +57,14 @@ public class BasicTeleOp extends OpMode {
 
 
     private void intake(){
-        intake.moveMotor(controller.intakeUpDown());
+        //intake.moveMotor(controller.intakeUpDown());
+
+        if(controller.intakeUpDown() > 0){
+            intake.raiseClaw();
+        }
+        if (controller.intakeUpDown() < 0) {
+            intake.lowerClaw();
+        }
 
         if(controller.clawGrab()){
             intake.closeClaw();

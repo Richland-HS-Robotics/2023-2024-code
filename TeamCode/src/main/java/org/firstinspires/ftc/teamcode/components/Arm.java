@@ -47,7 +47,7 @@ public class Arm {
      * The maximum number of ticks the linear slide can travel.
      * TODO Get a real value for this
      */
-    public static int MAX_TICKS = 3*TICKS_PER_ROTATION;
+    public static int MAX_TICKS = 6*TICKS_PER_ROTATION;
 
     private int currentTargetTicks = 0;
 
@@ -88,6 +88,15 @@ public class Arm {
 
 
         this.currentTargetTicks = ticks;
+    }
+
+    /**
+     * Get the slide's current position.
+     * @return A percent between 0 and 1. 0 means the slide is all the way down,
+     * 1 means it is all the way up.
+     */
+    public double getSlidePosition(){
+        return ((double) motor.getCurrentPosition())/MAX_TICKS;
     }
 
     /**
