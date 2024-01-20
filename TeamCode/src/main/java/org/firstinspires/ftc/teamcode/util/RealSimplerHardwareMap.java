@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,11 @@ public class RealSimplerHardwareMap implements SimplerHardwareMap{
     }
 
     @Override
+    public HardwareMap.DeviceMapping<VoltageSensor> voltageSensor() {
+        return realHardwareMap.voltageSensor;
+    }
+
+    @Override
     public <T> T get(Class<? extends T> classOrInterface, String deviceName) {
         return realHardwareMap.get(classOrInterface,deviceName);
     }
@@ -34,6 +40,10 @@ public class RealSimplerHardwareMap implements SimplerHardwareMap{
     @Override
     public Set<String> getNamesOf(HardwareDevice device) {
         return realHardwareMap.getNamesOf(device);
+    }
+
+    public void getVoltageSensor(){
+
     }
 
 

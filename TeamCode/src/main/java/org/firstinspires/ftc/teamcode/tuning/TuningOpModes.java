@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.tuning;
 
+import com.acmerobotics.roadrunner.MotorFeedforward;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ftc.AngularRampLogger;
 import com.acmerobotics.roadrunner.ftc.DriveType;
@@ -13,6 +14,7 @@ import com.acmerobotics.roadrunner.ftc.LateralRampLogger;
 import com.acmerobotics.roadrunner.ftc.ManualFeedforwardTuner;
 import com.acmerobotics.roadrunner.ftc.MecanumMotorDirectionDebugger;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Disabled
 public final class TuningOpModes {
     public static final Class<?> DRIVE_CLASS = MecanumDrive.class;
 
@@ -55,7 +58,7 @@ public final class TuningOpModes {
                 List<Encoder> leftEncs = new ArrayList<>(), rightEncs = new ArrayList<>();
                 List<Encoder> parEncs = new ArrayList<>(), perpEncs = new ArrayList<>();
                 if (md.localizer instanceof MecanumDrive.DriveLocalizer) {
-                    MecanumDrive.DriveLocalizer dl = (MecanumDrive.DriveLocalizer) md.localizer;
+                   MecanumDrive.DriveLocalizer dl = (MecanumDrive.DriveLocalizer) md.localizer;
                     leftEncs.add(dl.leftFront);
                     leftEncs.add(dl.leftRear);
                     rightEncs.add(dl.rightFront);
@@ -94,7 +97,10 @@ public final class TuningOpModes {
                         perpEncs,
                         md.imu,
                         md.voltageSensor,
-                        md.feedforward
+                        //md.feedforward
+                        () -> new MotorFeedforward(MecanumDrive.PARAMS.kS,
+                                MecanumDrive.PARAMS.kV / MecanumDrive.PARAMS.inPerTick,
+                                MecanumDrive.PARAMS.kA / MecanumDrive.PARAMS.inPerTick)
                 );
             };
         } else if (DRIVE_CLASS.equals(TankDrive.class)) {
@@ -135,12 +141,18 @@ public final class TuningOpModes {
                         perpEncs,
                         td.imu,
                         td.voltageSensor,
-                        td.feedforward
+                        //td.feedforward
+                        () -> new MotorFeedforward(TankDrive.PARAMS.kS,
+                                TankDrive.PARAMS.kV / TankDrive.PARAMS.inPerTick,
+                                TankDrive.PARAMS.kA / TankDrive.PARAMS.inPerTick)
                 );
             };
         } else {
             throw new AssertionError();
         }
+
+        ManualFeedforwardTuner.DISTANCE = 40;
+        ManualFeedbackTuner.DISTANCE = 40;
 
         manager.register(metaForClass(AngularRampLogger.class), new AngularRampLogger(dvf));
         manager.register(metaForClass(ForwardPushTest.class), new ForwardPushTest(dvf));
@@ -149,6 +161,8 @@ public final class TuningOpModes {
         manager.register(metaForClass(LateralRampLogger.class), new LateralRampLogger(dvf));
         manager.register(metaForClass(ManualFeedforwardTuner.class), new ManualFeedforwardTuner(dvf));
         manager.register(metaForClass(MecanumMotorDirectionDebugger.class), new MecanumMotorDirectionDebugger(dvf));
+
+
 
         manager.register(metaForClass(ManualFeedbackTuner.class), ManualFeedbackTuner.class);
         manager.register(metaForClass(SplineTest.class), SplineTest.class);

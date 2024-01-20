@@ -29,6 +29,8 @@ import com.google.common.collect.Maps;
 
 
 import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.util.SimplerHardwareMap;
 
@@ -41,6 +43,15 @@ import java.util.Set;
 public class FakeHardwareMap implements SimplerHardwareMap {
     Map<String, HardwareDevice> deviceMap = Maps.newHashMap();
     Map<HardwareDevice, String> deviceNames = Maps.newHashMap();
+
+    private HardwareMap.DeviceMapping<VoltageSensor> voltageSensors;
+    public HardwareMap.DeviceMapping<VoltageSensor> voltageSensor(){
+        return voltageSensors;
+    };
+
+    public FakeHardwareMap(){
+        voltageSensors.put("FakeVoltSensor",new FakeVoltageSensor());
+    }
 
     public void addDevice(String deviceName, HardwareDevice device) {
         deviceMap.put(deviceName, device);

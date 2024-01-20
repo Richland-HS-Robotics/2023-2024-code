@@ -1,5 +1,9 @@
 package ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Vector2d;
+
 import ftc.teamcode.fakes.FakeDcMotor;
 import ftc.teamcode.fakes.FakeExtendedDcMotor;
 import ftc.teamcode.fakes.FakeHardwareMap;
@@ -44,7 +48,7 @@ public class DriveTest {
 
     @Test
     public void testLocalDriveForward(){
-        drivetrain.localDrive(1,0,0);
+        drivetrain.localDrive(new PoseVelocity2d(new Vector2d(1,0),0));
 
         Assert.assertEquals(1,leftFront.getPower(),0.01);
         Assert.assertEquals(1,rightFront.getPower(),0.01);
@@ -55,7 +59,7 @@ public class DriveTest {
 
     @Test
     public void testLocalDriveBackward(){
-        drivetrain.localDrive(-1,0,0);
+        drivetrain.localDrive(new PoseVelocity2d(new Vector2d(-1,0),0));
 
         Assert.assertEquals(-1,leftRear.getPower(),0.1);
         Assert.assertEquals(-1,rightRear.getPower(),0.1);
@@ -65,7 +69,7 @@ public class DriveTest {
 
     @Test
     public void testLocalDriveRight(){
-        drivetrain.localDrive(0,1,0);
+        drivetrain.localDrive(new PoseVelocity2d(new Vector2d(0,1),0));
 
         Assert.assertEquals(-1,leftRear.getPower(),0.1);
         Assert.assertEquals(1,rightRear.getPower(),0.1);
@@ -75,7 +79,7 @@ public class DriveTest {
 
     @Test
     public void testLocalDriveLeft(){
-        drivetrain.localDrive(0,-1,0);
+        drivetrain.localDrive(new PoseVelocity2d(new Vector2d(0,-1),0));
 
 
         Assert.assertEquals(1,leftRear.getPower(),0.1);
@@ -88,7 +92,7 @@ public class DriveTest {
 
     @Test
     public void testRotateLeft(){
-        drivetrain.localDrive(0,0,-1);
+        drivetrain.localDrive(new PoseVelocity2d(new Vector2d(0,0),-1));
 
         Assert.assertEquals(-1,leftRear.getPower(),0.1);
         Assert.assertEquals(1,rightRear.getPower(),0.1);
@@ -96,7 +100,7 @@ public class DriveTest {
         Assert.assertEquals(1,rightFront.getPower(),0.1);
 
 
-        drivetrain.globalDrive(0,0,-1);
+        drivetrain.globalDrive(new PoseVelocity2d(new Vector2d(0,0),-1));
         Assert.assertEquals(-1,leftRear.getPower(),0.1);
         Assert.assertEquals(1,rightRear.getPower(),0.1);
         Assert.assertEquals(-1,leftFront.getPower(),0.1);
@@ -107,7 +111,7 @@ public class DriveTest {
 
     @Test
     public void testRotateRight(){
-        drivetrain.localDrive(0,0,1);
+        drivetrain.localDrive(new PoseVelocity2d(new Vector2d(0,0),1));
 
         Assert.assertEquals(1,leftRear.getPower(),0.1);
         Assert.assertEquals(-1,rightRear.getPower(),0.1);
@@ -115,7 +119,7 @@ public class DriveTest {
         Assert.assertEquals(-1,rightFront.getPower(),0.1);
 
 
-        drivetrain.globalDrive(0,0,1);
+        drivetrain.globalDrive(new PoseVelocity2d(new Vector2d(0,0),1));
 
         Assert.assertEquals(1,leftRear.getPower(),0.1);
         Assert.assertEquals(-1,rightRear.getPower(),0.1);
@@ -126,7 +130,7 @@ public class DriveTest {
 
     @Test
     public void testNoMovement(){
-        drivetrain.localDrive(0,0,0);
+        drivetrain.localDrive(new PoseVelocity2d(new Vector2d(0,0),0));
 
         Assert.assertEquals(0,leftRear.getPower(),0.1);
         Assert.assertEquals(0,rightRear.getPower(),0.1);
@@ -134,7 +138,7 @@ public class DriveTest {
         Assert.assertEquals(0,rightFront.getPower(),0.1);
 
 
-        drivetrain.globalDrive(0,0,0);
+        drivetrain.globalDrive(new PoseVelocity2d(new Vector2d(0,0),0));
         Assert.assertEquals(0,leftRear.getPower(),0.1);
         Assert.assertEquals(0,rightRear.getPower(),0.1);
         Assert.assertEquals(0,leftFront.getPower(),0.1);
@@ -148,7 +152,7 @@ public class DriveTest {
     @Test
     public void testGlobalMoveForward(){
         imu.setYaw(0);
-        drivetrain.globalDrive(1,0,0);
+        drivetrain.globalDrive(new PoseVelocity2d(new Vector2d(1,0),0));
 
         Assert.assertEquals(1,leftRear.getPower(),0.1);
         Assert.assertEquals(1,rightRear.getPower(),0.1);
@@ -156,7 +160,7 @@ public class DriveTest {
         Assert.assertEquals(1,rightFront.getPower(),0.1);
 
         imu.setYaw(Math.PI);
-        drivetrain.globalDrive(1,0,0);
+        drivetrain.globalDrive(new PoseVelocity2d(new Vector2d(1,0),0));
 
         Assert.assertEquals(-1,leftRear.getPower(),0.1);
         Assert.assertEquals(-1,rightRear.getPower(),0.1);
@@ -165,7 +169,7 @@ public class DriveTest {
 
 
         imu.setYaw(Math.PI/2);
-        drivetrain.globalDrive(1,0,0);
+        drivetrain.globalDrive(new PoseVelocity2d(new Vector2d(1,0),0));
 
         Assert.assertEquals(-1,leftRear.getPower(),0.1);
         Assert.assertEquals(1,rightRear.getPower(),0.1);
@@ -174,7 +178,7 @@ public class DriveTest {
 
 
         imu.setYaw(-Math.PI/2);
-        drivetrain.globalDrive(1,0,0);
+        drivetrain.globalDrive(new PoseVelocity2d(new Vector2d(1,0),0));
 
         Assert.assertEquals(1,leftRear.getPower(),0.1);
         Assert.assertEquals(-1,rightRear.getPower(),0.1);
@@ -182,7 +186,7 @@ public class DriveTest {
         Assert.assertEquals(1,rightFront.getPower(),0.1);
 
         imu.setYaw(Math.PI/4);
-        drivetrain.globalDrive(1,0,0);
+        drivetrain.globalDrive(new PoseVelocity2d(new Vector2d(1,0),0));
         Assert.assertEquals(0,leftRear.getPower(),0.1);
         Assert.assertEquals(1,rightRear.getPower(),0.1);
         Assert.assertEquals(1,leftFront.getPower(),0.1);

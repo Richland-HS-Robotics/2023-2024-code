@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.components.Arm;
+import org.firstinspires.ftc.teamcode.components.LinearSlide;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +21,7 @@ public class LinearSlideTest {
     private DcMotorEx motor;
     private FakeHardwareMap hardwareMap;
 
-    private Arm arm;
+    private LinearSlide linearSlide;
 
     private Telemetry telemetry;
 
@@ -39,34 +39,34 @@ public class LinearSlideTest {
         hardwareMap.addDevice("armRightServo",rightServo);
 
 
-        arm = new Arm(hardwareMap,telemetry);
+        linearSlide = new LinearSlide(hardwareMap,telemetry);
     }
 
 
     @Test
     public void testMovingArm(){
-        arm.setSlidePosition(1);
-        Assert.assertEquals(Arm.MAX_TICKS,arm.getCurrentTargetTicks());
-        Assert.assertEquals(Arm.MAX_TICKS,motor.getTargetPosition());
+        linearSlide.setSlidePosition(1);
+        Assert.assertEquals(LinearSlide.MAX_TICKS, linearSlide.getCurrentTargetTicks());
+        Assert.assertEquals(LinearSlide.MAX_TICKS,motor.getTargetPosition());
         Assert.assertEquals(DcMotor.RunMode.RUN_TO_POSITION,motor.getMode());
 
 
-        arm.setSlidePosition(0);
-        Assert.assertEquals(0,arm.getCurrentTargetTicks());
+        linearSlide.setSlidePosition(0);
+        Assert.assertEquals(0, linearSlide.getCurrentTargetTicks());
         Assert.assertEquals(0,motor.getTargetPosition());
         Assert.assertEquals(DcMotor.RunMode.RUN_TO_POSITION,motor.getMode());
 
 
-        arm.setSlidePosition(-5);
-        Assert.assertEquals(0,arm.getCurrentTargetTicks());
+        linearSlide.setSlidePosition(-5);
+        Assert.assertEquals(0, linearSlide.getCurrentTargetTicks());
         Assert.assertEquals(0,motor.getTargetPosition());
         Assert.assertEquals(DcMotor.RunMode.RUN_TO_POSITION,motor.getMode());
 
 
 
-        arm.setSlidePosition(103);
-        Assert.assertEquals(Arm.MAX_TICKS,arm.getCurrentTargetTicks());
-        Assert.assertEquals(Arm.MAX_TICKS,motor.getTargetPosition());
+        linearSlide.setSlidePosition(103);
+        Assert.assertEquals(LinearSlide.MAX_TICKS, linearSlide.getCurrentTargetTicks());
+        Assert.assertEquals(LinearSlide.MAX_TICKS,motor.getTargetPosition());
         Assert.assertEquals(DcMotor.RunMode.RUN_TO_POSITION,motor.getMode());
     }
 

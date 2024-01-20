@@ -210,7 +210,7 @@ public class FakeExtendedDcMotor implements DcMotorEx {
         return currentEncoderPosition;
     }
 
-    public void setCurrentPosistion(int currentMotorPosistion) {
+    public void setCurrentPosition(int currentMotorPosistion) {
         this.currentEncoderPosition = currentMotorPosistion;
     }
 
@@ -274,5 +274,20 @@ public class FakeExtendedDcMotor implements DcMotorEx {
     @Override
     public void close() {
 
+    }
+
+    /**
+     *  Update the motor, so that it moves according to the power applied.
+     *  @param dt The delta time, in seconds
+     *
+     *  <br>
+     *  TODO implement different modes.
+     */
+    public void tick(double dt){
+        int ticks_per_rotation = 72;
+
+        int ticks_per_second = 360;
+
+        this.currentEncoderPosition += (dt * ticks_per_second * motorPower);
     }
 }

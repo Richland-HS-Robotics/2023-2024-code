@@ -35,15 +35,15 @@ public class Claw {
     public static final int TICKS_PER_ROTATION = 288;
 
     /**
-     * The rotational range of the arm, in radians.
+     * The rotational range of the linearSlide, in radians.
      * Currently at 90 degrees; TODO get a better measurement
      */
     public static final double ARM_ROTATION_RANGE = Math.PI/2;
 
 
     /**
-     * The current set position of the arm, in radians. A position
-     * of 0 means the arm is on the ground, a position of ARM_ROTATION_RANGE means it is
+     * The current set position of the linearSlide, in radians. A position
+     * of 0 means the linearSlide is on the ground, a position of ARM_ROTATION_RANGE means it is
      * fully up.
      */
     private double currentTargetPosition = ARM_ROTATION_RANGE;
@@ -65,8 +65,8 @@ public class Claw {
             clawMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         }
 
-        telemetry.addData("PID: ",
-        clawMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
+        //telemetry.addData("PID: ",
+        //clawMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
     }
 
 
@@ -126,14 +126,14 @@ public class Claw {
     /**
      * Moves the claw to a fixed position.
      * @param angle An angle in radians, between 0 and ARM_ROTATION_RANGE. 0 represents
-     *              the arm fully down, while ARM_ROTATION_RANGE represents it fully up.
+     *              the linearSlide fully down, while ARM_ROTATION_RANGE represents it fully up.
      */
     public void moveToPosition(double angle){
         // Make sure the angle is within range
         double correctedAngle = HelperFunctions.clamp(angle,0,ARM_ROTATION_RANGE);
 
-        // 0 ticks represents the arm fully up; the number of ticks increases
-        // as the arm goes down.
+        // 0 ticks represents the linearSlide fully up; the number of ticks increases
+        // as the linearSlide goes down.
         int ticks = angleToTicks(ARM_ROTATION_RANGE) - angleToTicks(correctedAngle);
 
         clawMotor.setTargetPosition(ticks);
@@ -174,8 +174,8 @@ public class Claw {
 
 
     /**
-     * Get the current position of the arm, in radians.
-     * @return The position, in radians. 0 means the arm is fully down, while ARM_ROTATION_RANGE
+     * Get the current position of the linearSlide, in radians.
+     * @return The position, in radians. 0 means the linearSlide is fully down, while ARM_ROTATION_RANGE
      *         means it is all the way up.
      */
     public double getCurrentPosition(){

@@ -39,6 +39,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.util.RealSimplerHardwareMap;
+import org.firstinspires.ftc.teamcode.util.SimplerHardwareMap;
 
 import java.lang.Math;
 import java.util.Arrays;
@@ -76,7 +78,7 @@ public final class MecanumDrive {
 
     private final LinkedList<Pose2d> poseHistory = new LinkedList<>();
 
-    public class DriveLocalizer implements Localizer {
+   public class DriveLocalizer implements Localizer {
         public final Encoder leftFront, leftRear, rightRear, rightFront;
 
         private int lastLeftFrontPos, lastLeftRearPos, lastRightRearPos, lastRightFrontPos;
@@ -173,7 +175,7 @@ public final class MecanumDrive {
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-        localizer = new ThreeDeadWheelLocalizer(hardwareMap,PARAMS.inPerTick);
+        localizer = new ThreeDeadWheelLocalizer(new RealSimplerHardwareMap(hardwareMap),PARAMS.inPerTick);
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
     }
@@ -216,6 +218,7 @@ public final class MecanumDrive {
 
         @Override
         public boolean run(@NonNull TelemetryPacket p) {
+
             double t;
             if (beginTs < 0) {
                 beginTs = Actions.now();
@@ -245,6 +248,7 @@ public final class MecanumDrive {
 
             MecanumKinematics.WheelVelocities<Time> wheelVels = kinematics.inverse(command);
             double voltage = voltageSensor.getVoltage();
+
             leftFront.setPower(feedforward.compute(wheelVels.leftFront) / voltage);
             leftBack.setPower(feedforward.compute(wheelVels.leftBack) / voltage);
             rightBack.setPower(feedforward.compute(wheelVels.rightBack) / voltage);

@@ -20,6 +20,8 @@
 package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,8 @@ import java.util.Set;
  *
  */
 public interface SimplerHardwareMap {
+    public HardwareMap.DeviceMapping<VoltageSensor> voltageSensor();
+
     <T> T get(Class<? extends T> classOrInterface, String deviceName);
 
     <T> List<T> getAll(Class<? extends T> classOrInterface);

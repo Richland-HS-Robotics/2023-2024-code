@@ -4,27 +4,39 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.AccelConstraint;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Actions;
+import com.acmerobotics.roadrunner.AngularVelConstraint;
 import com.acmerobotics.roadrunner.DualNum;
 import com.acmerobotics.roadrunner.HolonomicController;
 import com.acmerobotics.roadrunner.MecanumKinematics;
+import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.MotorFeedforward;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Pose2dDual;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.PoseVelocity2dDual;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.Rotation2dDual;
 import com.acmerobotics.roadrunner.Time;
 import com.acmerobotics.roadrunner.TimeTrajectory;
 import com.acmerobotics.roadrunner.TimeTurn;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Twist2dDual;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.Vector2dDual;
+import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -36,13 +48,17 @@ import org.firstinspires.ftc.teamcode.driveclasses.DriveLocalizer;
 import org.firstinspires.ftc.teamcode.driveclasses.Localizer;
 import org.firstinspires.ftc.teamcode.driveclasses.Params;
 import org.firstinspires.ftc.teamcode.driveclasses.PoseMessage;
+import org.firstinspires.ftc.teamcode.driveclasses.ThreeDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.util.HelperFunctions;
+import org.firstinspires.ftc.teamcode.util.PIDFController;
 import org.firstinspires.ftc.teamcode.util.SimplerHardwareMap;
 import org.firstinspires.ftc.teamcode.util.Triple;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+@Config
 public class DriveTrain {
     private DcMotorEx leftFront;
     private DcMotorEx rightFront;
@@ -62,7 +78,8 @@ public class DriveTrain {
 
     public enum DriveMode {
         FIELD_CENTRIC,
-        ROBOT_CENTRIC
+        ROBOT_CENTRIC,
+        SNAP_TO_POINT,
     }
 
     public final MecanumKinematics kinematics = new MecanumKinematics(
@@ -76,11 +93,27 @@ public class DriveTrain {
             PARAMS.kA / PARAMS.inPerTick
     );
 
+
+    public static double HEADING_GAIN = 0;
+    public static double HEADING_VEL_GAIN = 0;
+
+    public PIDFController headingController = new PIDFController(
+        new PIDFController.PIDCoefficients(HEADING_GAIN,0, HEADING_VEL_GAIN),
+            PARAMS.kV,
+            PARAMS.kA,
+            PARAMS.kS
+    );
+
+
     public final Localizer localizer;
 
     LinkedList<Pose2d> poseHistory = new LinkedList<Pose2d>();
 
     public Pose2d pose;
+
+
+    //private ColorSensor colorSensor;
+    private RevColorSensorV3 colorSensor;
 
 
     public DriveTrain(@NonNull SimplerHardwareMap hardwareMap, @NonNull Telemetry telemetry ){
@@ -91,26 +124,36 @@ public class DriveTrain {
             this.rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
 
             this.imu = hardwareMap.get(IMU.class, "imu");
+
+            this.colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
         } catch (Throwable T){
-            Log.e(LOG_TAG,"Cannot find all drive motors and IMU. Disabling drivetrain.");
+            String message = "Cannot find all drive motors and IMU. Disabling drivetrain.";
+            Log.e(LOG_TAG,message);
+            telemetry.addData(LOG_TAG,message);
             this.disabled = true;
         }
 
         this.leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        this.rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        this.leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
 //        this.leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        this.localizer = new DriveLocalizer(
-                new OverflowEncoder(new RawEncoder(this.leftFront)),
-                new OverflowEncoder(new RawEncoder(this.leftRear)),
-                new OverflowEncoder(new RawEncoder(this.rightFront)),
-                new OverflowEncoder(new RawEncoder(this.rightRear)),
-                this.imu
-        );
+        this.localizer = new ThreeDeadWheelLocalizer(hardwareMap, PARAMS.inPerTick);
+//        this.localizer = new DriveLocalizer(
+//                new OverflowEncoder(new RawEncoder(this.leftFront)),
+//                new OverflowEncoder(new RawEncoder(this.leftRear)),
+//                new OverflowEncoder(new RawEncoder(this.rightFront)),
+//                new OverflowEncoder(new RawEncoder(this.rightRear)),
+//                this.imu
+//        );
 
-
+        this.headingController.setInputBounds(-Math.PI, Math.PI);
+        voltageSensor = hardwareMap.voltageSensor().iterator().next();
 
         this.telemetry = telemetry;
+    }
+
+    public void setPose(Pose2d pose){
+        this.pose  = pose;
     }
 
 
@@ -118,14 +161,20 @@ public class DriveTrain {
         this.localizer.update();
     }
 
-    public void teleOpDrive(Triple<Double,Double,Double> input,DriveMode driveMode,double slownessFactor){
+    public void teleOpDrive(PoseVelocity2d input,DriveMode driveMode,double slownessFactor){
 
         switch (driveMode){
             case ROBOT_CENTRIC:
-                localDrive(input.x*slownessFactor,input.y*slownessFactor,input.z*slownessFactor);
+//                localDrive(input.x*slownessFactor,input.y*slownessFactor,input.z*slownessFactor);
+                localDrive(
+                        new PoseVelocity2d(input.linearVel.times(slownessFactor),
+                                input.angVel*slownessFactor));
                 break;
             case FIELD_CENTRIC:
-                globalDrive(input.x,input.y,input.z);
+                globalDrive(input);
+                break;
+            case SNAP_TO_POINT:
+
                 break;
         }
     }
@@ -133,69 +182,133 @@ public class DriveTrain {
 
     /**
      * Drive the robot using local coordinate system.
-      * @param forward The forward-backward component.  Between -1 and 1.
-     * @param strafe - The left-right component.  Between -1 and 1, 1 is right.
-     * @param turn - The rotational component. Between -1 and 1.
+     * @param pose - The relative pose. Y is forward, X is right.
      */
-    public void localDrive(double forward, double strafe, double turn){
+    public void localDrive(PoseVelocity2d pose){
         if(disabled){return;}
 
         // See https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
         // for mecanum drive guide.
 
         // restrict inputs between -1 and 1
-        double y = HelperFunctions.clamp(forward,-1,1);
-        double x = HelperFunctions.clamp(strafe,-1,1) * STRAFE_COEFFICIENT; // This helps fix issues with wheels slipping
-        double rot = HelperFunctions.clamp(turn,-1,1);
-
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rot),1);
-
-        double leftFrontPower = (y + x + rot) / denominator;
-        double leftRearPower = (y - x - rot) / denominator;
-        double rightFrontPower = (y - x + rot) / denominator;
-        double rightRearPower = (y + x - rot) / denominator;
-
-        this.leftFront.setPower(leftFrontPower);
-        this.leftRear.setPower(leftRearPower);
-        this.rightFront.setPower(rightFrontPower);
-        this.rightRear.setPower(rightRearPower);
+//        double y = HelperFunctions.clamp(pose.linearVel.y,-1,1);
+//        double x = HelperFunctions.clamp(pose.linearVel.x,-1,1) * STRAFE_COEFFICIENT; // This helps fix issues with wheels slipping
+//        double rot = HelperFunctions.clamp(pose.angVel,-1,1);
+//
+//        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rot),1);
+//
+//        double leftFrontPower = (y + x + rot) / denominator;
+//        double leftRearPower = (y - x + rot) / denominator;
+//        double rightFrontPower = (y - x - rot) / denominator;
+//        double rightRearPower = (y + x - rot) / denominator;
+//
+//        this.leftFront.setPower(leftFrontPower);
+//        this.leftRear.setPower(leftRearPower);
+//        this.rightFront.setPower(rightFrontPower);
+//        this.rightRear.setPower(rightRearPower);
+        mecanumDriveSetDrivePowers(pose);
     }
 
 
     /**
      * Drive the robot using a field-centric coordinate system.
-     * @param forward The forward-backward component. Between -1 and 1.
-     * @param strafe The left-right component. Between -1 and 1.
-     * @param turn The rotational component.
+     * @param pose - The relative pose. Y is forward, X is right.
      */
-    public void globalDrive(double forward, double strafe, double turn){
+    public void globalDrive(PoseVelocity2d pose){
         if(disabled){return;}
+        this.updatePoseEstimate();
 
-        double y = HelperFunctions.clamp(forward,-1,1);
-        double x = HelperFunctions.clamp(strafe,-1,1);
-        double rot = HelperFunctions.clamp(turn,-1,1);
+        double y = HelperFunctions.clamp(pose.linearVel.y,-1,1);
+        double x = HelperFunctions.clamp(pose.linearVel.x,-1,1);
+        double rot = HelperFunctions.clamp(pose.angVel,-1,1);
 
-        double heading = this.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//        double heading = this.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double heading = this.pose.heading.log();
 
+
+        PoseVelocity2d newPose = new PoseVelocity2d(
+                new Vector2d(
+                    Math.cos(-heading)*pose.linearVel.x - Math.sin(-heading)*pose.linearVel.y ,
+                        Math.sin(-heading)*pose.linearVel.x + Math.cos(-heading)*pose.linearVel.y
+                ),
+                pose.angVel
+        );
 
         double rotX = x * Math.cos(heading) - y * Math.sin(heading);
         double rotY = x * Math.sin(heading) + y * Math.cos(heading);
 
-        rotX *= STRAFE_COEFFICIENT;
-
-        localDrive(rotY,rotX,turn);
+//        mecanumDriveSetDrivePowers(pose);
+        localDrive(newPose);
     }
 
-    public Action snapToAngle(double radians){
-        updatePoseEstimate();
+    public void snapToAngle(){
+//        Pose2dDual<Time> txWorldTarget = new Pose2dDual<>(
+//                new Vector2dDual<>(new DualNum<Time>(new double[]{0,0,0}),new DualNum<Time>(new double[]{0,0,0})),
+//                new Rotation2dDual<>(new DualNum<Time>(new double[]{0,0,0}),new DualNum<Time>(new double[]{0,0,0}))
+//        );
 
-        double currentRot = pose.heading.real;
+        Pose2dDual<Time> txWorldTarget = Pose2dDual.constant(new Pose2d(0,0,0),3);
 
-        //double target = 0; // target is 0 degrees for now.
 
-        double angleToTurn = -currentRot; // This works for a target of 0
+        PoseVelocity2d robotVelRobot = updatePoseEstimate();
+PoseVelocity2dDual<Time> command = new HolonomicController(
+                PARAMS.axialGain,PARAMS.lateralGain,PARAMS.headingGain,
+                PARAMS.axialVelGain,PARAMS.lateralVelGain,PARAMS.headingVelGain
+        ).compute(txWorldTarget, pose, robotVelRobot);
 
-        return new TurnAction(new TimeTurn(pose,angleToTurn,new TurnConstraints(20,0.1,2)));
+        MecanumKinematics.WheelVelocities<Time> wheelVels = kinematics.inverse(command);
+
+        double voltage = voltageSensor.getVoltage();
+
+        leftFront.setPower(feedforward.compute(wheelVels.leftFront) / voltage);
+        leftRear.setPower(feedforward.compute(wheelVels.leftBack) / voltage);
+        rightRear.setPower(feedforward.compute(wheelVels.rightBack) / voltage);
+        rightFront.setPower(feedforward.compute(wheelVels.rightFront) / voltage);
+    }
+
+    public void snapToAngleBetter(PoseVelocity2d input){
+        FtcDashboard dash = FtcDashboard.getInstance();
+
+
+        double xTarget = 0;
+
+        Vector2d target = new Vector2d(0,0);
+
+
+        Vector2d fieldCentricInput = rotated(input.linearVel,-pose.heading.log());
+
+
+        double xDifference = xTarget - pose.position.x;
+
+
+        Vector2d difference = target.minus(pose.position);
+        double theta = difference.angleCast().log();
+
+        double thetaFF = -rotated(fieldCentricInput,-Math.PI/2).dot(difference) / difference.sqrNorm();
+
+        headingController.targetPosition = theta;
+
+        double headingInput = (headingController.update(pose.heading.log()) * PARAMS.kV + thetaFF)
+                * PARAMS.trackWidthTicks;
+
+
+        PoseVelocity2d driveInput = new PoseVelocity2d(fieldCentricInput,headingInput);
+
+        mecanumDriveSetDrivePowers(driveInput);
+    }
+
+
+    @Deprecated
+    private PoseVelocity2d normalizeVelocity(PoseVelocity2d vel){
+        return new PoseVelocity2d(vel.linearVel.div(vel.linearVel.norm()),0);
+    }
+
+
+    private Vector2d rotated(Vector2d v,double angle){
+        return new Vector2d(
+                Math.cos(angle)*v.x - Math.sin(angle)*v.y,
+                Math.sin(angle)*v.x + Math.sin(angle)*v.y
+        );
     }
 
 
@@ -218,6 +331,81 @@ public class DriveTrain {
     }
 
 
+    /**
+     * Runs a given action until a color is detected
+     */
+    public final class RunUntilColorAction implements Action{
+
+        private Action action;
+        private Triple<Double, Double, Double> rgbColor;
+        private Triple<Double, Double, Double> yuvColor;
+
+        private double DISTANCE_THRESHOLD = 5;
+
+        public RunUntilColorAction(Action action,Triple<Double,Double,Double> color){
+            this.action = action;
+            this.rgbColor = color;
+            this.yuvColor = this.rgb2yuv(color);
+        }
+
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if(!this.action.run(telemetryPacket)){
+                // If the action has completed, end this action as well
+                return false;
+            }
+
+            Triple<Double,Double,Double> rgbSensorColor = new Triple<>((double) colorSensor.red(),(double) colorSensor.green(),(double) colorSensor.blue());
+            Triple<Double,Double,Double> yuvSensorColor = rgb2yuv(rgbSensorColor);
+
+
+
+
+            double distance = this.distanceSquared(yuvSensorColor,this.yuvColor);
+
+            // Return false if color detected, otherwise true
+            return !(distance < DISTANCE_THRESHOLD);
+        }
+
+
+        /**
+         * Convert a color from RGB to <a href="https://en.wikipedia.org/wiki/Y%E2%80%B2UV">YUV</a>
+         * @param rgb - The RGB color
+         * @return - The YUV color
+         */
+        private Triple<Double,Double,Double> rgb2yuv(Triple<Double, Double, Double> rgb){
+            // Conversion table, from https://stackoverflow.com/questions/5392061/algorithm-to-check-similarity-of-colors
+
+            // |  Y' |     |  0.299     0.587    0.114   | | R |
+            // |  U  |  =  | -0.14713  -0.28886  0.436   | | G |
+            // |  V  |     |  0.615    -0.51499 -0.10001 | | B |
+ 
+            
+            
+            double r = rgb.x;
+            double g = rgb.y;
+            double b = rgb.z;
+
+            double y =  0.299*r + 0.587*g + 0.114*b;
+            double u = -0.14713*r - 0.28886*g + 0.114*b;
+            double v = 0.615*r - 0.51499*g - 0.10001*b;
+
+            return new Triple<>(y,u,v);
+        }
+
+        /**
+         * Find the squared euclidean distance between two colors.
+         * @param c1 The first color
+         * @param c2 The second color
+         * @return The euclidean distance squared
+         */
+        private double distanceSquared(Triple<Double,Double,Double> c1, Triple<Double,Double,Double> c2){
+            return Math.pow(c2.x - c1.x,2) + Math.pow(c2.y - c1.y,2) + Math.pow(c2.z - c1.z,2);
+        }
+
+
+    }
 
 
     public final class FollowTrajectoryAction implements Action{
@@ -255,9 +443,15 @@ public class DriveTrain {
                 t = Actions.now() - beginTs;
             }
 
+            Pose2dDual<Time> txWorldTarget = timeTrajectory.get(t);
+
+            PoseVelocity2d robotVelRobot = updatePoseEstimate();
+            Pose2d error = txWorldTarget.value().minusExp(pose);
+
 
             // if we have gone over the duration of the trajectory, stop the robot.
-            if(t >= timeTrajectory.duration){
+            if((t >= timeTrajectory.duration && error.position.norm() < 2 && robotVelRobot.linearVel.norm() < 0.5)
+            || t - 5 >= timeTrajectory.duration){
                 leftFront.setPower(0);
                 leftRear.setPower(0);
                 rightFront.setPower(0);
@@ -267,9 +461,6 @@ public class DriveTrain {
             }
 
 
-            Pose2dDual<Time> txWorldTarget = timeTrajectory.get(t);
-
-            PoseVelocity2d robotVelRobot = updatePoseEstimate();
 
             PoseVelocity2dDual<Time> command = new HolonomicController(
                 PARAMS.axialGain, PARAMS.lateralGain,PARAMS.headingGain, PARAMS.axialVelGain,PARAMS.lateralVelGain,PARAMS.headingVelGain
@@ -413,6 +604,33 @@ public class DriveTrain {
         Vector2d p1 = t.position.plus(halfv);
         Vector2d p2 = p1.plus(halfv);
         c.strokeLine(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    public TurnConstraints defaultTurnConstraints = new TurnConstraints(
+            PARAMS.maxAngVel,-PARAMS.maxAngAccel,PARAMS.maxAngAccel
+    );
+    public VelConstraint defaultVelConstraint =
+            new MinVelConstraint(Arrays.asList(
+                kinematics.new WheelVelConstraint(PARAMS.maxWheelVel),
+                    new AngularVelConstraint(PARAMS.maxAngVel)
+            ));
+    public AccelConstraint defaultAccelConstraint =
+            new ProfileAccelConstraint(PARAMS.minProfileAccel,PARAMS.maxProfileAccel);
+
+
+    public TrajectoryActionBuilder actionBuilder(Pose2d beginPose){
+        return new TrajectoryActionBuilder(
+                TurnAction::new,
+                FollowTrajectoryAction::new,
+                beginPose,
+                1e-6,
+                0.0,
+                defaultTurnConstraints,
+                defaultVelConstraint,
+                defaultAccelConstraint,
+                0.25,
+                0.1
+        );
     }
 
 }
