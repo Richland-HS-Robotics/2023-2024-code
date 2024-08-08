@@ -163,6 +163,7 @@ public class BasicTeleOp extends OpMode {
         driveTrain.updatePoseEstimate();
 
         if(controller.snapToPosition()){
+            driveTrain.constrainedDrive(controller.movementControl());
             //driveTrain.snapToAngleBetter(controller.movementControl());
         }else{
             driveTrain.teleOpDrive(controller.movementControl(),this.driveMode, controller.movementSpeed());
